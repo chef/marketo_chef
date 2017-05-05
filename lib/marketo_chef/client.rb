@@ -27,11 +27,11 @@ module MarketoChef
       end.body
     end
 
-    def trigger_campaign(lead_id)
+    def trigger_campaign(campaign_id, lead_id)
       authenticate!
 
       connection.post do |req|
-        req.url "/rest/v1/campaigns/#{@campaign_id}/trigger.json"
+        req.url "/rest/v1/campaigns/#{campaign_id}/trigger.json"
         req.headers[:authorization] = "Bearer #{@token}"
         req.body = { input: { leads: [{ id: lead_id }] } }
       end.body

@@ -15,6 +15,8 @@ module MarketoChef
   MAYBE_OUR_FAULT_CODES   = [1003, 1006].freeze
   MAYBE_THEIR_FAULT_CODES = [1001, 1002].freeze
 
+  CAMPAIGN_ID = ENV.fetch('MARKETO_CAMPAIGN_ID')
+
   class << self
     def add_lead(lead)
       result = sync(lead)
@@ -23,7 +25,7 @@ module MarketoChef
 
       handle_skipped(lead, result) if result['status'] == 'skipped'
 
-      trigger_campaign(result['id']) if result.key?('id')
+      trigger_campaign(CAMPAIGN_ID, result['id']) if result.key?('id')
     end
 
     private
@@ -38,10 +40,10 @@ module MarketoChef
       response['result']&.first
     end
 
-    def trigger_campaign(lead_id)
-      response = Client.instance.trigger_campaign(lead_id)
+    def trigger_campaign(campaign_id, lead_id)
+      response = Client.instance.trigger_campaign(campaign_id, lead_id)
 
-      campaign_error(lead_id, response) if response.key?('errors')
+      campaign_error(campaign_id, lead_id, response) if response.key?('errors')
 
       response
     end
@@ -65,11 +67,11 @@ module MarketoChef
       ERR
     end
 
-    def campaign_error(leads, errors)
+    def campaign_error(campaign_id, lead, errors)
       capture_error <<~ERR
         Campaign Triggering Error: #{errors}\n
-        \tcampaign id: #{@campaign_id}\n
-        \tleads: #{leads}
+        \tcampaign id: #{campaign_id}\n
+        \tlead: #{lead}
       ERR
     end
   end
