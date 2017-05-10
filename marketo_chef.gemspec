@@ -33,7 +33,10 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'faraday',            '>= 0.11'
+  # This gem needs to be compatible with OmniAuth (used on the Learn Chef site)
+  # which depends on the OAuth2 gem, which requires faraday ['>= 0.8', '< 0.12']
+  # https://github.com/intridea/oauth2/blob/v1.3.1/oauth2.gemspec
+  spec.add_runtime_dependency 'faraday',            '~> 0.11.0'
   spec.add_runtime_dependency 'faraday_middleware', '~> 0.11'
 
   spec.add_development_dependency 'bundler',  '~> 1.14'
