@@ -65,6 +65,7 @@ module MarketoChef
 
     def authenticate
       connection.get('/identity/oauth/token', auth_params).tap do |res|
+        raise res.body if res.body.kind_of?(String)
         raise res.body['errors'][0]['message'] if res.body.key?('errors')
 
         save_authentication(res.body)
