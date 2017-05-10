@@ -40,7 +40,8 @@ module MarketoChef
     private
 
     def connection
-      @connection ||= Faraday.new(url: "https://#{@host}") do |conn|
+      url = @host.start_with?('http') && @host || "https://#{@host}"
+      @connection ||= Faraday.new(url: url) do |conn|
         conn.request  :multipart
         conn.request  :json
         conn.response :json, content_type: /\bjson$/
