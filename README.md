@@ -27,7 +27,7 @@ Required environment variables, with bogus example values:
 MARKETO_HOST="123-ABC-456.mktorest.com"
 MARKETO_CLIENT_ID="c4206ec5-be87-465c-a0cc-99486a4c4e1b"
 MARKETO_CLIENT_SECRET="Z5bzTySMrFdgcFZkSNvBywMuUen9ah7Q"
-MARKETO_CAMPAIGN="1234"
+MARKETO_CAMPAIGN_ID="1234"
 ```
 
 There is a single public method exposed, and it expects a hash of lead data.
