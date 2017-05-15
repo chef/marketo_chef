@@ -4,6 +4,8 @@ This gem defines a Marketo API client providing a simple interface to our
 single common use case: adding a lead to the Marketo database and assigning it
 to a specific campaign.
 
+[![Build Status](https://travis-ci.com/chef/marketo_chef.svg?token=QMKWuXEPx23uB8JGd4tb&branch=master)](https://travis-ci.com/chef/marketo_chef)
+
 ## Installation
 
 Add this line to your application's Gemfile:
