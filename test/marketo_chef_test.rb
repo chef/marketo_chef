@@ -7,7 +7,7 @@ class MarketoChefTest < Minitest::Test
     refute_nil ::MarketoChef::VERSION
   end
 
-  def test_it_does_something_useful
-    assert false
+  def test_that_it_does_something_useful
+    assert ::MarketoChef.respond_to? :add_lead
   end
 end
