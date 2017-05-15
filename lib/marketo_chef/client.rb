@@ -65,13 +65,17 @@ module MarketoChef
 
     def authenticate
       connection.get('/identity/oauth/token', auth_params).tap do |res|
-        # res.body may be an HTML string with a "The document has moved" message, which
-        # occurs if the host is mktoapi.com instead of mktorest.com.
-        raise res.body if res.body.kind_of?(String)
-        raise res.body['errors'][0]['message'] if res.body.key?('errors')
+        inspect_auth_response(res.body)
 
         save_authentication(res.body)
       end
+    end
+
+    def inspect_auth_response(body)
+      # res.body may be an HTML string, "The document has moved" message,
+      # which occurs if the host is mktoapi.com instead of mktorest.com.
+      raise body if body.is_a?(String)
+      raise body['errors'][0]['message'] if body.key?('errors')
     end
 
     def auth_params
