@@ -52,6 +52,10 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run
 `rake test` to run the tests. You can also run `bin/console` for an interactive
 prompt that will allow you to experiment.
 
+You can also run `rubocop` to verify style guide adherence. It happens along
+with the tests in CI, but better to catch those problems before committing and
+pushing and so on.
+
 To install this gem onto your local machine, run `bundle exec rake install`.
 
 To release a new version, update the version number in `version.rb`, then
