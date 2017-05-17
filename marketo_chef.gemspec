@@ -6,6 +6,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'marketo_chef/version'
 
 # rubocop:disable Style/GuardClause
+# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name     = 'marketo_chef'
   spec.version  = MarketoChef::VERSION
@@ -39,10 +40,12 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'faraday',            '~> 0.11.0'
   spec.add_runtime_dependency 'faraday_middleware', '~> 0.11'
 
-  spec.add_development_dependency 'bundler',  '~> 1.14'
-  spec.add_development_dependency 'minitest', '~> 5.0'
-  spec.add_development_dependency 'rake',     '~> 10.0'
-  spec.add_development_dependency 'travis',   '~> 1.8'
+  spec.add_development_dependency 'bundler',            '~> 1.14'
+  spec.add_development_dependency 'minitest',           '~> 5.10'
+  spec.add_development_dependency 'rake',               '~> 12.0'
+  spec.add_development_dependency 'rspec-expectations', '~> 3.6'
+  spec.add_development_dependency 'rubocop',            '~> 0.48'
+  spec.add_development_dependency 'travis',             '~> 1.8'
 end
-
+# rubocop:enable Metrics/BlockLength
 # rubocop:enable Style/GuardClause

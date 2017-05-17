@@ -10,12 +10,9 @@ module MarketoChef
   # Faraday wrapper to handle communication with Marketo API
   class Client
     include Singleton
+    extend Forwardable
 
-    def initialize
-      @host          = ENV.fetch('MARKETO_HOST')
-      @client_id     = ENV.fetch('MARKETO_CLIENT_ID')
-      @client_secret = ENV.fetch('MARKETO_CLIENT_SECRET')
-    end
+    def_delegators :MarketoChef, :client_id, :client_secret, :host
 
     def sync_lead(lead)
       authenticate!
@@ -40,8 +37,7 @@ module MarketoChef
     private
 
     def connection
-      raise "Host '#{@host}' cannot contain a slash" if @host.include?('/')
-      @connection ||= Faraday.new(url: "https://#{@host}") do |conn|
+      @connection ||= Faraday.new(url: "https://#{host}") do |conn|
         conn.request  :multipart
         conn.request  :json
         conn.response :json, content_type: /\bjson$/
@@ -81,8 +77,8 @@ module MarketoChef
     def auth_params
       {
         grant_type:    'client_credentials',
-        client_id:     @client_id,
-        client_secret: @client_secret
+        client_id:     client_id,
+        client_secret: client_secret
       }
     end
 

@@ -22,7 +22,21 @@ Or install it yourself as:
 
 ## Usage
 
-The gem currently expects to be configured solely via environment variables.
+The gem expects client code to configure it before use. Like so:
+```ruby
+MarketoChef.configure do |c|
+  c.host          = ENV['MARKETO_HOST']
+  c.client_id     = ENV['MARKETO_CLIENT_ID']
+  c.client_secret = ENV['MARKETO_CLIENT_SECRET']
+  c.campaign_id   = ENV['MARKETO_CAMPAIGN_ID']
+end
+```
+Conventionally this would be added to an initializer in Rails or Hanami, for
+example in a file `config/initializers/01_marketo_chef.rb`, with Rails. This
+ensures the application will attempt to configure the gem at start time rather
+than later, when discovering that configuration values aren't available
+(perhaps an environment variable name is incorrect) will generate unexpected
+errors.
 
 Required environment variables, with bogus example values:
 ```shell
@@ -32,9 +46,10 @@ MARKETO_CLIENT_SECRET="Z5bzTySMrFdgcFZkSNvBywMuUen9ah7Q"
 MARKETO_CAMPAIGN_ID="1234"
 ```
 
-There is a single public method exposed, and it expects a hash of lead data.
+The gem exposes a single method for lead tracking, which accepts a hash of lead
+data, creates or updates the lead in Marketo, and adds it to the specified
+campaign.
 
-Required keys, with bogus example values:
 ```ruby
 MarketoChef.add_lead(
   'formname':         'Some Form',
