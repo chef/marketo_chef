@@ -50,7 +50,6 @@ The gem exposes a single method for lead tracking, which accepts a hash of lead
 data, creates or updates the lead in Marketo, and adds it to the specified
 campaign.
 
-Required keys, with bogus example values:
 ```ruby
 MarketoChef.add_lead(
   'formname':         'Some Form',
