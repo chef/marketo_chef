@@ -5,12 +5,21 @@ module MarketoChef
   class Configuration
     FIELDS = %i[host client_id client_secret campaign_id].freeze
 
-    attr_accessor(*FIELDS)
+    attr_accessor :client_id, :client_secret, :campaign_id
+    attr_reader :host
 
     def initialize(config = {})
-      config.each do |k, v|
-        instance_variable_set("@#{k}", v) if FIELDS.include?(k.downcase.to_sym)
-      end
+      return unless config.any?
+
+      config.map { |k, v| send("#{k}=", v) if FIELDS.include?(k) }
+    end
+
+    def host=(value)
+      value = value.sub('mktoapi', 'mktorest')
+
+      match = %r{https?:\/\/(.+)}.match(value)
+
+      @host = match ? match[1] : value
     end
 
     def validate

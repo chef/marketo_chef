@@ -37,7 +37,6 @@ module MarketoChef
     private
 
     def connection
-      raise "Host '#{host}' cannot contain a slash" if host.include?('/')
       @connection ||= Faraday.new(url: "https://#{host}") do |conn|
         conn.request  :multipart
         conn.request  :json
