@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
-require 'marketo_chef/version'
+require 'forwardable'
+
 require 'marketo_chef/client'
+require 'marketo_chef/configuration'
+require 'marketo_chef/version'
 
 # Common usage of the Marketo API for our web properties
 module MarketoChef
@@ -15,9 +18,22 @@ module MarketoChef
   MAYBE_OUR_FAULT_CODES   = [1003, 1006].freeze
   MAYBE_THEIR_FAULT_CODES = [1001, 1002].freeze
 
-  CAMPAIGN_ID = ENV.fetch('MARKETO_CAMPAIGN_ID')
-
   class << self
+    extend Forwardable
+
+    def_delegators :configuration,
+                   :campaign_id, :client_id, :client_secret, :host
+
+    def configuration
+      @configuration ||= Configuration.new
+    end
+
+    def configure
+      yield(configuration)
+
+      configuration.validate
+    end
+
     def add_lead(lead)
       result = sync(lead)
 
@@ -25,7 +41,7 @@ module MarketoChef
 
       handle_skipped(lead, result) if result['status'] == 'skipped'
 
-      trigger_campaign(CAMPAIGN_ID, result['id']) if result.key?('id')
+      trigger_campaign(campaign_id, result['id']) if result.key?('id')
     end
 
     private
