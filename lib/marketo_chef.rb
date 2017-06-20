@@ -8,6 +8,9 @@ require 'marketo_chef/version'
 
 # Common usage of the Marketo API for our web properties
 module MarketoChef
+  # http://developers.marketo.com/rest-api/error-codes/#response_level_errors
+  # 607: Daily API Request Limit Reached
+  # 611: System Error (generic unhandled exception)
   # http://developers.marketo.com/rest-api/error-codes/#record_level_errors
   # 1001: Invalid value '%s'. Required of type '%s'
   # 1002: Missing value for required parameter '%s'
@@ -70,17 +73,17 @@ module MarketoChef
     end
 
     def handle_skipped(lead, reasons)
-      codes      = ->(c) { c['code'] }
-      reportable = ->(c) { MAYBE_OUR_FAULT_CODES.include?(c) }
-      feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
+      begin
+        codes      = ->(c) { c['code'] }
+        reportable = ->(c) { MAYBE_OUR_FAULT_CODES.include?(c) }
+        feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
 
-      return unless reasons.collect(&codes).any?(&reportable)
+        return unless reasons.collect(&codes).any?(&reportable)
+      rescue TypeError => e
+        skipped_lead_type_error(lead, reasons, e)
+      end
 
-      capture_error <<~ERR
-        Lead Submission Skipped:\n
-        \tinput: #{lead}\n
-        \t#{reasons.select(&reportable).collect(&feedback).join("\n\t")}
-      ERR
+      skipped_lead_error(lead, reasons, feedback)
     end
 
     def campaign_error(campaign_id, lead, errors)
@@ -88,6 +91,23 @@ module MarketoChef
         Campaign Triggering Error: #{errors}\n
         \tcampaign id: #{campaign_id}\n
         \tlead: #{lead}
+      ERR
+    end
+
+    def skipped_lead_error(lead, reasons, feedback)
+      capture_error <<~ERR
+        Lead Submission Skipped:\n
+        \tinput: #{lead}\n
+        \t#{reasons.select(&reportable).collect(&feedback).join("\n\t")}
+      ERR
+    end
+
+    def skipped_lead_type_error(lead, reasons, error)
+      capture_error <<~ERR
+        Unregognized Marketo Skipped Lead Error Response:\n
+        \tLead: #{lead}\n
+        \tReasons: #{reasons}\n
+        \tError: #{error}
       ERR
     end
   end
