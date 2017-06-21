@@ -11,6 +11,8 @@ module MarketoChef
   # http://developers.marketo.com/rest-api/error-codes/#response_level_errors
   # 607: Daily API Request Limit Reached
   # 611: System Error (generic unhandled exception)
+  RESPONSE_ERROR_CODES = [607, 611].freeze
+
   # http://developers.marketo.com/rest-api/error-codes/#record_level_errors
   # 1001: Invalid value '%s'. Required of type '%s'
   # 1002: Missing value for required parameter '%s'
@@ -40,9 +42,11 @@ module MarketoChef
     def add_lead(lead)
       result = sync(lead)
 
+      # put these in sync()?
       return unless result
 
       handle_skipped(lead, result) if result['status'] == 'skipped'
+      # ^^^
 
       trigger_campaign(campaign_id, result['id']) if result.key?('id')
     end
@@ -51,6 +55,10 @@ module MarketoChef
 
     def sync(lead)
       response = Client.instance.sync_lead(lead)
+
+      # check response success
+      # if false, definitely response-level error
+      # if true, maybe record level errors ... let add_lead sort that out
 
       if response.key?('errors')
         capture_error("Lead Submission Error: #{response}\n#{lead}")
@@ -74,17 +82,15 @@ module MarketoChef
     end
 
     def handle_skipped(lead, reasons)
-      begin
-        codes      = ->(c) { c['code'] }
-        reportable = ->(c) { MAYBE_OUR_FAULT_CODES.include?(c) }
-        feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
+      codes      = ->(c) { c['code'] }
+      reportable = ->(c) { MAYBE_OUR_FAULT_CODES.include?(c) }
+      feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
 
-        return unless reasons.collect(&codes).any?(&reportable)
-      rescue TypeError => e
-        skipped_lead_type_error(lead, reasons, e)
-      end
+      return unless reasons.collect(&codes).any?(&reportable)
 
-      skipped_lead_error(lead, reasons, feedback)
+      skipped_lead_error(lead, reasons.select(&reportable).collect(&feedback))
+    rescue TypeError => error
+      skipped_lead_type_error(lead, reasons, error)
     end
 
     def campaign_error(campaign_id, lead, errors)
@@ -95,17 +101,17 @@ module MarketoChef
       ERR
     end
 
-    def skipped_lead_error(lead, reasons, feedback)
+    def skipped_lead_error(lead, reasons)
       capture_error <<~ERR
         Lead Submission Skipped:\n
         \tinput: #{lead}\n
-        \t#{reasons.select(&reportable).collect(&feedback).join("\n\t")}
+        \t#{reasons.join("\n\t")}
       ERR
     end
 
     def skipped_lead_type_error(lead, reasons, error)
       capture_error <<~ERR
-        Unregognized Marketo Skipped Lead Error Response:\n
+        Something went wrong trying to parse this skipped lead response:\n
         \tLead: #{lead}\n
         \tReasons: #{reasons}\n
         \tError: #{error}
