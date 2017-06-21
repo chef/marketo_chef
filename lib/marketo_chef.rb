@@ -54,6 +54,7 @@ module MarketoChef
 
       if response.key?('errors')
         capture_error("Lead Submission Error: #{response}\n#{lead}")
+        return
       end
 
       response['result']&.first
