@@ -42,11 +42,9 @@ module MarketoChef
     def add_lead(lead)
       result = sync(lead)
 
-      # put these in sync()?
       return unless result
 
       handle_skipped(lead, result) if result['status'] == 'skipped'
-      # ^^^
 
       trigger_campaign(campaign_id, result['id']) if result.key?('id')
     end
@@ -57,15 +55,7 @@ module MarketoChef
       response = Client.instance.sync_lead(lead)
 
       # check response success
-      # if false, definitely response-level error
-      # if true, maybe record level errors ... let add_lead sort that out
-
-      if response.key?('errors')
-        capture_error("Lead Submission Error: #{response}\n#{lead}")
-        return
-      end
-
-      response['result']&.first
+      handle_response(response)
     end
 
     def trigger_campaign(campaign_id, lead_id)
@@ -81,6 +71,22 @@ module MarketoChef
       Raven.capture_exception(Exception.new(message))
     end
 
+    def handle_response(response)
+      return response['result']&.first unless response.key?('errors')
+
+      handle_response_err(response)
+    end
+
+    def handle_response_err(response)
+      codes      = ->(c) { c['code'] }
+      known      = ->(c) { RESPONSE_ERROR_CODES.include?(c) }
+      feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
+
+      return unless reasons.reject(&codes).any?(&known)
+
+      response_error(response.reject(&known).collect(&feedback))
+    end
+
     def handle_skipped(lead, reasons)
       codes      = ->(c) { c['code'] }
       reportable = ->(c) { MAYBE_OUR_FAULT_CODES.include?(c) }
@@ -91,6 +97,13 @@ module MarketoChef
       skipped_lead_error(lead, reasons.select(&reportable).collect(&feedback))
     rescue TypeError => error
       skipped_lead_type_error(lead, reasons, error)
+    end
+
+    def response_error(reasons)
+      capture_error <<~ERR
+        Response Error:\n
+        \t#{reasons.join("\n\t")}
+      ERR
     end
 
     def campaign_error(campaign_id, lead, errors)
