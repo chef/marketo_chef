@@ -54,8 +54,11 @@ module MarketoChef
     def sync(lead)
       response = Client.instance.sync_lead(lead)
 
-      # check response success
-      handle_response(response)
+      if response.key?('errors')
+        handle_response_err(response)
+      else
+        response['result']&.first
+      end
     end
 
     def trigger_campaign(campaign_id, lead_id)
@@ -71,18 +74,12 @@ module MarketoChef
       Raven.capture_exception(Exception.new(message))
     end
 
-    def handle_response(response)
-      return response['result']&.first unless response.key?('errors')
-
-      handle_response_err(response)
-    end
-
     def handle_response_err(response)
       codes      = ->(c) { c['code'] }
       known      = ->(c) { RESPONSE_ERROR_CODES.include?(c) }
       feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
 
-      return unless reasons.reject(&codes).any?(&known)
+      return if reasons.collect(&codes).any?(&known)
 
       response_error(response.reject(&known).collect(&feedback))
     end
