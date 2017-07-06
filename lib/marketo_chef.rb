@@ -44,7 +44,7 @@ module MarketoChef
 
       return unless result
 
-      handle_skipped(lead, result) if result['status'] == 'skipped'
+      handle_skipped(lead, result['reasons']) if result['status'] == 'skipped'
 
       trigger_campaign(campaign_id, result['id']) if result.key?('id')
     end
@@ -75,7 +75,7 @@ module MarketoChef
     end
 
     def handle_response_err(response)
-      codes      = ->(c) { c['code'] }
+      codes      = ->(c) { Integer(c['code']) }
       known      = ->(c) { RESPONSE_ERROR_CODES.include?(c) }
       feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
 
@@ -85,13 +85,13 @@ module MarketoChef
     end
 
     def handle_skipped(lead, reasons)
-      codes      = ->(c) { c['code'] }
+      codes      = ->(c) { Integer(c['code']) }
       reportable = ->(c) { MAYBE_OUR_FAULT_CODES.include?(c) }
       feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
 
       return unless reasons.collect(&codes).any?(&reportable)
 
-      skipped_lead_error(lead, reasons.select(&reportable).collect(&feedback))
+      skipped_lead_error(lead, reasons.collect(&feedback))
     rescue TypeError => error
       skipped_lead_type_error(lead, reasons, error)
     end
