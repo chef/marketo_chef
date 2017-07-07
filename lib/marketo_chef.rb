@@ -11,7 +11,7 @@ module MarketoChef
   # http://developers.marketo.com/rest-api/error-codes/#response_level_errors
   # 607: Daily API Request Limit Reached
   # 611: System Error (generic unhandled exception)
-  RESPONSE_ERROR_CODES = [607, 611].freeze
+  RESPONSE_ERROR_CODES = %w[607 611].freeze
 
   # http://developers.marketo.com/rest-api/error-codes/#record_level_errors
   # 1001: Invalid value '%s'. Required of type '%s'
@@ -20,8 +20,8 @@ module MarketoChef
   # 1006: Field '%s' not found
   # 1007: Multiple leads match the lookup criteria
   # ...these are the only ones we might need to care about currently
-  MAYBE_OUR_FAULT_CODES   = [1003, 1006].freeze
-  MAYBE_THEIR_FAULT_CODES = [1001, 1002].freeze
+  MAYBE_OUR_FAULT_CODES   = %w[1003 1006].freeze
+  MAYBE_THEIR_FAULT_CODES = %w[1001 1002].freeze
 
   class << self
     extend Forwardable
@@ -75,7 +75,7 @@ module MarketoChef
     end
 
     def handle_response_err(response)
-      codes      = ->(c) { Integer(c['code']) }
+      codes      = ->(c) { c['code'] }
       known      = ->(c) { RESPONSE_ERROR_CODES.include?(c) }
       feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
 
@@ -85,7 +85,7 @@ module MarketoChef
     end
 
     def handle_skipped(lead, reasons)
-      codes      = ->(c) { Integer(c['code']) }
+      codes      = ->(c) { c['code'] }
       reportable = ->(c) { MAYBE_OUR_FAULT_CODES.include?(c) }
       feedback   = ->(r) { "#{r['code']}: #{r['message']}" }
 
