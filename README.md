@@ -10,7 +10,9 @@ to a specific campaign.
 
 Add this line to your application's Gemfile:
 
-```ruby gem 'marketo_chef' ```
+```ruby
+gem 'marketo_chef'
+```
 
 And then execute:
 
@@ -73,9 +75,14 @@ pushing and so on.
 
 To install this gem onto your local machine, run `bundle exec rake install`.
 
-To release a new version, update the version number in `version.rb`, then
-create a git tag for the version, and update CHANGELOG.md to document the
-release. Finally, push git commits and tags to GitHub.
+### Releasing
+
+To release a new version:
+1. increment the version number in `version.rb`
+2. update `CHANGELOG.md` to attribute changes for the new version
+3. commit the above and tag that commit for the version (ex: `git tag -s -m 'v1.0.3 - Use Artifactory' v1.0.3 abcdefg`)
+4. push commits and tags to github (ex: `git push origin master --tags`)
+5. push gem to artifactory (ex: `gem push marketo_chef-1.0.3.gem --host http://artifactory.chef.co/api/gems/cia-gems-local`)
 
 This gem is not public and should not be published to rubygems.org.
 
