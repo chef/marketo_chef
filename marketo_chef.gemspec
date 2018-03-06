@@ -1,7 +1,20 @@
-# coding: utf-8
 # frozen_string_literal: true
 
-lib = File.expand_path('../lib', __FILE__)
+# Copyright 2018 Chef Software Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'marketo_chef/version'
 
@@ -16,7 +29,7 @@ Gem::Specification.new do |spec|
   spec.summary  = 'Marketo API client for our common uses and error handling'
   spec.homepage = 'https://github.com/chef/marketo_chef'
 
-  spec.licenses = [] # closed-source
+  spec.licenses = ['Apache-2.0']
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the
   # 'allowed_push_host' to allow pushing to a single host or delete this

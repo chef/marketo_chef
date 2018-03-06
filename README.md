@@ -73,11 +73,14 @@ pushing and so on.
 
 To install this gem onto your local machine, run `bundle exec rake install`.
 
-To release a new version, update the version number in `version.rb`, then
-create a git tag for the version, and update CHANGELOG.md to document the
-release. Finally, push git commits and tags to GitHub.
+### Releasing
 
-This gem is not public and should not be published to rubygems.org.
+To release a new version:
+1. increment the version number in `version.rb`
+2. update `CHANGELOG.md` with additions, changes, or removals
+3. commit the above and tag that commit for the version (ex: `git tag -s -m 'v1.1.0 - Public release' v1.1.0 abcdefg`)
+4. push commits and tags to github (ex: `git push origin master --tags`)
+5. push gem to RubyGems.org (ex: `gem push marketo_chef-1.1.0.gem`)
 
 ## Contributing
 
